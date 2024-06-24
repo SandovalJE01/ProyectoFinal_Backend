@@ -1,0 +1,205 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: API Ecommerce
+  description: API pensada para Ecommerce y manejar sus productos, carritos y usuarios.
+paths:
+  /store/products:
+    get:
+      summary: Obtiene los productos
+      tags:
+        - Products
+      responses:
+        "200":
+          description: Productos obtenidos exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        "500":
+          description: Error en el servidor
+  /store/products/{pid}:
+    get:
+      summary: Obtiene un producto por ID
+      tags:
+        - Products
+      parameters:
+        - in: path
+          name: pid
+          required: true
+          schema:
+            type: string
+          description: ID del producto
+      responses:
+        "200":
+          description: Producto obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        "404":
+          description: Producto no encontrado
+        "500":
+          description: Error en el servidor
+  /store/addCart:
+    post:
+      summary: Agrega un producto al carrito
+      tags:
+        - Cart
+      requestBody:
+        description: ID del producto a agregar
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                productId:
+                  type: string
+      responses:
+        "200":
+          description: Producto agregado al carrito exitosamente
+        "403":
+          description: No puedes agregar tu propio producto al carrito
+        "500":
+          description: Error en el servidor
+  /store/{cid}/purchase:
+    post:
+      summary: Realiza la compra del carrito
+      tags:
+        - Cart
+      parameters:
+        - in: path
+          name: cid
+          required: true
+          schema:
+            type: string
+          description: ID del carrito
+      responses:
+        "200":
+          description: Compra realizada con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  ticket:
+                    type: object
+        "404":
+          description: Carrito no encontrado
+        "500":
+          description: Error al procesar la compra del carrito
+  /store/cart:
+    get:
+      summary: Obtiene el carrito del usuario
+      tags:
+        - Cart
+      responses:
+        "200":
+          description: Carrito obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cart:
+                    $ref: '#/components/schemas/Cart'
+        "404":
+          description: El usuario no tiene un carrito asociado
+        "500":
+          description: Error en el servidor
+  /store/create-product:
+    post:
+      summary: Crea un nuevo producto
+      tags:
+        - Products
+      requestBody:
+        description: Datos del nuevo producto
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewProduct'
+      responses:
+        "200":
+          description: Producto creado con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  product:
+                    $ref: '#/components/schemas/Product'
+        "403":
+          description: No tienes permiso para crear productos
+        "500":
+          description: Error al crear el producto
+  /store/products/{productId}:
+    delete:
+      summary: Elimina un producto
+      tags:
+        - Products
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+          description: ID del producto
+      responses:
+        "200":
+          description: Producto eliminado correctamente
+        "403":
+          description: No tienes permiso para eliminar este producto
+        "404":
+          description: Producto no encontrado
+        "500":
+          description: Error al eliminar el producto
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+        owner:
+          type: string
+          description: ID del usuario que es dueño del producto
+    NewProduct:
+      type: object
+      properties:
+        name:
+          type: string
+        price:
+          type: number
+        category:
+          type: string
+        description:
+          type: string
+    Cart:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+          description: ID del usuario
+        products:
+          type: array
+          items:
+            type: string
+          description: Lista de IDs de productos en el carrito
+        total:
+          type: number
+          description: Total del carrito

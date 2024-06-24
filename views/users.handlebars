@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+</head>
+<body>
+    <h1>Gestión de Usuarios</h1>
+    <div>
+        <a href="/panel-administracion">Volver al panel</a>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each users}}
+                <tr>
+                    <td>{{this.first_name}} {{this.last_name}}</td>
+                    <td>{{this.email}}</td>
+                    <td>{{this.role}}</td>
+                    <td>
+                        <select id="role{{@index}}" name="role">
+                            <option value="user">User</option>
+                            <option value="premium">Premium</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <button onclick="changeRole('{{this._id}}', getSelectedRoleValue('role{{@index}}'));">Cambiar Rol</button>
+                        <button onclick="deleteUser('{{this._id}}')">Eliminar</button>
+                    </td>
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    <script>
+        function handleRoleChange(selectElement) {
+            const selectedRole = selectElement.value;
+            console.log(selectedRole);
+        }
+
+        function getSelectedRoleValue(id) {
+            const selectElement = document.getElementById(id);
+            console.log(selectElement);
+            return selectElement.value;
+        }
+
+        function changeRole(userId, newRole) {
+            console.log(userId, newRole)
+            fetch(`/api/users/${userId}/role?role=${newRole}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ role: newRole })
+            })
+           .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al cambiar el rol del usuario');
+                }
+                return response.json();
+            })
+           .then(data => {
+                console.log(data);                
+                window.location.reload();
+            })
+           .catch(error => {
+                console.error(error);
+            });
+        }
+
+        function deleteUser(userId) {
+            fetch(`/api/users/${userId}`, {
+                method: 'DELETE'
+            })
+           .then(response => {
+                if (!response.ok) {
+                    throw new Error('Error al eliminar el usuario');
+                }
+                return response.json();
+            })
+           .then(data => {
+                console.log(data);                
+                window.location.reload();
+            })
+           .catch(error => {
+                console.error(error);
+            });
+        }
+    </script>
+</body>
+</html>

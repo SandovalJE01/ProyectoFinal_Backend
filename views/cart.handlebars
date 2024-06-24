@@ -1,0 +1,41 @@
+<h1>Carrito de compra</h1>
+<ul>
+    {{#each cart.products}}
+        <li>
+            {{this.name}} - ${{this.price}} 
+        </li>
+    {{/each}}
+</ul>
+    <button type="button" onclick="completePurchase('{{cart._id}}')">Completar compra</button>
+</div>
+
+<script>
+function completePurchase(cartId) {
+    Swal.fire({
+        title: '¿Estás seguro de completar la compra?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, completar compra!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/store/${cartId}/purchase`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                Swal.fire('¡Compra completada!', data.message, 'success');
+                window.location.href = '/store/products';
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                Swal.fire('Oops...', 'Algo salió mal al procesar tu compra.', 'error');
+            });
+        }
+    });
+}
+</script>
